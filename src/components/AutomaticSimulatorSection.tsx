@@ -29,7 +29,7 @@ interface AutomaticSimulatorSectionProps {
 }
 
 export const CanvasControls: React.FC<AutomaticSimulatorSectionProps> = (props) => (
-  <>
+  <div className="flex flex-col gap-3 w-full min-w-0">
     <CanvasStage
       model={props.model}
       state={props.state}
@@ -56,7 +56,7 @@ export const CanvasControls: React.FC<AutomaticSimulatorSectionProps> = (props) 
       t={props.t}
       lang={props.lang}
     />
-  </>
+  </div>
 );
 
 export const Results: React.FC<AutomaticSimulatorSectionProps> = (props) => (

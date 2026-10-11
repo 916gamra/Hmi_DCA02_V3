@@ -320,7 +320,7 @@ export default function App() {
 
             {/* Mobile View */}
             <div className="lg:hidden flex flex-col gap-4">
-              <div className="sticky top-0 z-20 bg-[#f1f4f9] pt-2 pb-2">
+              <div className="sticky top-0 z-20 bg-[#f1f4f9] pt-2 pb-2 flex flex-col gap-2">
                 <CanvasControls
                   model={model}
                   state={simState}
@@ -346,25 +346,25 @@ export default function App() {
                   t={t}
                   lang={lang}
                 />
-              </div>
 
-              <div className="flex gap-2 p-1 bg-white rounded-xl border border-[#e2e8f0]">
-                <button
-                  onClick={() => setMobileAutoPane('params')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    mobileAutoPane === 'params' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
-                  }`}
-                >
-                  {lang === 'ar' ? 'ضبط' : 'Réglages'}
-                </button>
-                <button
-                  onClick={() => setMobileAutoPane('results')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                    mobileAutoPane === 'results' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
-                  }`}
-                >
-                  {lang === 'ar' ? 'نتائج' : 'Résultats'}
-                </button>
+                <div className="flex gap-2 p-1 bg-white rounded-xl border border-[#e2e8f0]">
+                  <button
+                    onClick={() => setMobileAutoPane('params')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                      mobileAutoPane === 'params' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
+                    }`}
+                  >
+                    {lang === 'ar' ? 'ضبط' : 'Réglages'}
+                  </button>
+                  <button
+                    onClick={() => setMobileAutoPane('results')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                      mobileAutoPane === 'results' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
+                    }`}
+                  >
+                    {lang === 'ar' ? 'نتائج' : 'Résultats'}
+                  </button>
+                </div>
               </div>
 
               {mobileAutoPane === 'params' ? (
