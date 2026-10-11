@@ -196,34 +196,35 @@ src/
 ---
 
 ## 🚀 التثبيت والتشغيل المحلي (Setup & Installation)
+- **الإصدار الحالي:** 3.0.1
 
 ### المتطلبات الأساسية
 - **Node.js** (إصدار 18 فما فوق)
-- مدير الحزم **npm** أو **bun**
 
 ### خطوات التشغيل
-1. استنساخ المستودع والدخول للمجلد:
+
+#### باستخدام Bun (الموصى به)
 ```bash
-cd hmi-tray-designer
+bun install
+bun run dev
 ```
 
-2. تثبيت الحزم البرمجية:
-```bash
-npm install
-```
+#### باستخدام npm
+*ملاحظة: يوجد تعارض peer بسيط مع esbuild في بعض إصدارات npm، لذا يُفضّل استخدام `--legacy-peer-deps`.*
 
-3. تشغيل خادم التطوير المحلي:
 ```bash
+npm install --legacy-peer-deps
 npm run dev
 ```
+
 سيفتح التطبيق تلقائياً على الرابط: `http://localhost:3000`
 
-4. تشغيل اختبارات الوحدة (Automated Unit Tests):
+### اختبارات الوحدة (Automated Unit Tests)
 ```bash
 npm test
 ```
 
-5. بناء النسخة الإنتاجية (Production Build):
+### بناء النسخة الإنتاجية (Production Build)
 ```bash
 npm run build
 ```

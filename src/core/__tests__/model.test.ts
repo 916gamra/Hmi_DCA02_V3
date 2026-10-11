@@ -84,6 +84,42 @@ describe('buildModel geometry & clearances', () => {
     expect(model.layers.length).toBe(machineParams.layers);
     expect(model.all.length).toBeGreaterThan(0);
   });
+
+  describe('stepAngle + sanitizeN consistency', () => {
+    it('synchronizes n and stepAngle correctly for multiples of 3', () => {
+      // 360 / 12 = 30 (multiple of 3)
+      const params: TrayParams = {
+        ...DEFAULT_PARAMS,
+        mode: 'custom',
+        custom: [{ stepAngle: 12, n: 30, off: 0 }]
+      };
+      const model = buildModel(params);
+      const layer = model.layers[0];
+      
+      expect(layer.n % 3).toBe(0);
+      expect(Math.abs(layer.step - (360 / layer.n))).toBeLessThan(1e-9);
+      // 360 / 30 = 12° step.
+      expect(layer.step).toBe(12);
+    });
+
+    it('synchronizes n and stepAngle correctly for non-multiples of 3 (recalculates step)', () => {
+      // 360 / 13 ≈ 27.69. sanitizeN(27.69) -> 27. 
+      // 360 / 27 = 13.3333.
+      const params: TrayParams = {
+        ...DEFAULT_PARAMS,
+        mode: 'machine',
+        custom: [{ stepAngle: 13, n: 27, off: 0 }]
+      };
+      const model = buildModel(params);
+      const layer = model.layers[0];
+      
+      expect(layer.n % 3).toBe(0);
+      // New step should be 360 / 27 = 13.333333333333334
+      expect(Math.abs(layer.n * layer.step - 360)).toBeLessThan(0.001);
+      expect(layer.step).not.toBe(13); // Should be recalculated
+      expect(Math.abs(layer.step - (360 / 27))).toBeLessThan(1e-9);
+    });
+  });
 });
 
 describe('buildTimeline execution timing', () => {

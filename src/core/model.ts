@@ -48,39 +48,44 @@ export function buildModel(p: TrayParams): TrayModel {
     let rawN: number;
     let off: number;
     let step: number;
+    let n: number;
 
+    // لأن الآلة تحتوي على 3 رؤوس متزامنة بزاوية 120°، يجب أن يكون عدد النقاط مضاعفاً لـ 3.
+    // لذلك نُعيد دائماً حساب step = 360 / n بعد sanitizeN لضمان إغلاق الدائرة بدقة.
     if (p.mode === 'all') {
       rawN = p.rawBase;
       off = i * p.addAngle;
       const nClean = sanitizeN(rawN);
+      n = nClean;
       step = 360 / nClean;
     } else if (p.mode === 'machine') {
       // TouchWin machine recipe mode
       const cfg = p.custom[i] || { n: p.rawBase, off: i * p.addAngle };
       off = cfg.off || 0;
       if (cfg.stepAngle && cfg.stepAngle > 0) {
-        step = cfg.stepAngle;
         rawN = Math.round(360 / cfg.stepAngle);
+        n = sanitizeN(rawN);
+        step = 360 / n;
       } else {
         rawN = cfg.n || p.rawBase;
-        const nClean = sanitizeN(rawN);
-        step = 360 / nClean;
+        n = sanitizeN(rawN);
+        step = 360 / n;
       }
     } else {
       // custom mode
       const cfg = p.custom[i] || { n: p.rawBase, off: i * p.addAngle };
       off = cfg.off || 0;
       if (cfg.stepAngle && cfg.stepAngle > 0) {
-        step = cfg.stepAngle;
         rawN = Math.round(360 / cfg.stepAngle);
+        n = sanitizeN(rawN);
+        step = 360 / n;
       } else {
         rawN = cfg.n || p.rawBase;
-        const nClean = sanitizeN(rawN);
-        step = 360 / nClean;
+        n = sanitizeN(rawN);
+        step = 360 / n;
       }
     }
 
-    const n = sanitizeN(rawN);
     const per = n / 3;
 
     if (Math.round(rawN) !== n) {
