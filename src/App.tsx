@@ -11,7 +11,7 @@ import { BottomNavBar, MainTab } from './components/BottomNavBar';
 import { QrCodeModal } from './components/QrCodeModal';
 import { QrScannerModal } from './components/QrScannerModal';
 import { Toast } from './components/Toast';
-import { AutomaticSimulatorSection } from './components/AutomaticSimulatorSection';
+import { AutomaticSimulatorSection, CanvasControls, Results } from './components/AutomaticSimulatorSection';
 import { SaveArticleModal } from './components/SaveArticleModal';
 import { ImportChoiceModal } from './components/ImportChoiceModal';
 import { RecipePreviewModal } from './components/RecipePreviewModal';
@@ -140,6 +140,7 @@ export default function App() {
     rings: true,
     labels: true,
   });
+  const [mobileAutoPane, setMobileAutoPane] = useState<'params' | 'results'>('params');
 
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
@@ -317,8 +318,96 @@ export default function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] gap-4 md:gap-6 items-start">
-              {/* Sidebar Column: Parameters */}
+            {/* Mobile View */}
+            <div className="lg:hidden flex flex-col gap-4">
+              <div className="sticky top-0 z-20 bg-[#f1f4f9] pt-2 pb-2">
+                <CanvasControls
+                  model={model}
+                  state={simState}
+                  options={viewOptions}
+                  onChangeOptions={setViewOptions}
+                  currentTimeMs={simTimeMs}
+                  totalTimeMs={timeline.total}
+                  isPlaying={isPlaying}
+                  speed={speed}
+                  onTogglePlay={handleTogglePlay}
+                  onReset={resetSim}
+                  onStepNext={stepNext}
+                  onStepPrev={stepPrev}
+                  onScrubTime={scrubTime}
+                  onChangeSpeed={(spd) => {
+                    setSpeed(spd);
+                    handleUpdateParams({ speed: spd });
+                  }}
+                  onOpenSaveModal={() => setIsSaveModalOpen(true)}
+                  onOpenQr={() => setIsQrOpen(true)}
+                  params={params}
+                  totalCycleTimeMs={timeline.total}
+                  t={t}
+                  lang={lang}
+                />
+              </div>
+
+              <div className="flex gap-2 p-1 bg-white rounded-xl border border-[#e2e8f0]">
+                <button
+                  onClick={() => setMobileAutoPane('params')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                    mobileAutoPane === 'params' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
+                  }`}
+                >
+                  {lang === 'ar' ? 'ضبط' : 'Réglages'}
+                </button>
+                <button
+                  onClick={() => setMobileAutoPane('results')}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                    mobileAutoPane === 'results' ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
+                  }`}
+                >
+                  {lang === 'ar' ? 'نتائج' : 'Résultats'}
+                </button>
+              </div>
+
+              {mobileAutoPane === 'params' ? (
+                <ParametersPanel
+                  params={params}
+                  model={model}
+                  t={t}
+                  lang={lang}
+                  onChange={handleUpdateParams}
+                  onAutoCalculateSpacing={handleAutoCalculateSpacing}
+                />
+              ) : (
+                <Results
+                  model={model}
+                  params={params}
+                  totalCycleTimeMs={timeline.total}
+                  t={t}
+                  lang={lang}
+                  // These props are required by AutomaticSimulatorSectionProps, passing them even if Results doesn't use all.
+                  state={simState}
+                  options={viewOptions}
+                  onChangeOptions={setViewOptions}
+                  currentTimeMs={simTimeMs}
+                  totalTimeMs={timeline.total}
+                  isPlaying={isPlaying}
+                  speed={speed}
+                  onTogglePlay={handleTogglePlay}
+                  onReset={resetSim}
+                  onStepNext={stepNext}
+                  onStepPrev={stepPrev}
+                  onScrubTime={scrubTime}
+                  onChangeSpeed={(spd) => {
+                    setSpeed(spd);
+                    handleUpdateParams({ speed: spd });
+                  }}
+                  onOpenSaveModal={() => setIsSaveModalOpen(true)}
+                  onOpenQr={() => setIsQrOpen(true)}
+                />
+              )}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden lg:grid grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] gap-4 md:gap-6 items-start">
               <aside className="w-full">
                 <ParametersPanel
                   params={params}
@@ -330,7 +419,6 @@ export default function App() {
                 />
               </aside>
 
-              {/* Main Stage Column: Canvas Stage + Controls + Validation KPIs */}
               <AutomaticSimulatorSection
                 model={model}
                 state={simState}

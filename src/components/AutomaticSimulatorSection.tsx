@@ -28,68 +28,52 @@ interface AutomaticSimulatorSectionProps {
   lang: Language;
 }
 
-export const AutomaticSimulatorSection: React.FC<AutomaticSimulatorSectionProps> = ({
-  model,
-  state,
-  options,
-  onChangeOptions,
-  currentTimeMs,
-  totalTimeMs,
-  isPlaying,
-  speed,
-  onTogglePlay,
-  onReset,
-  onStepNext,
-  onStepPrev,
-  onScrubTime,
-  onChangeSpeed,
-  onOpenSaveModal,
-  onOpenQr,
-  params,
-  totalCycleTimeMs,
-  t,
-  lang,
-}) => {
+export const CanvasControls: React.FC<AutomaticSimulatorSectionProps> = (props) => (
+  <>
+    <CanvasStage
+      model={props.model}
+      state={props.state}
+      options={props.options}
+      onChangeOptions={props.onChangeOptions}
+      t={props.t}
+      lang={props.lang}
+    />
+    <SimulationControls
+      model={props.model}
+      state={props.state}
+      currentTimeMs={props.currentTimeMs}
+      totalTimeMs={props.totalTimeMs}
+      isPlaying={props.isPlaying}
+      speed={props.speed}
+      onTogglePlay={props.onTogglePlay}
+      onReset={props.onReset}
+      onStepNext={props.onStepNext}
+      onStepPrev={props.onStepPrev}
+      onScrubTime={props.onScrubTime}
+      onChangeSpeed={props.onChangeSpeed}
+      onOpenSaveModal={props.onOpenSaveModal}
+      onOpenQr={props.onOpenQr}
+      t={props.t}
+      lang={props.lang}
+    />
+  </>
+);
+
+export const Results: React.FC<AutomaticSimulatorSectionProps> = (props) => (
+  <ValidationCard
+    model={props.model}
+    params={props.params}
+    totalCycleTimeMs={props.totalCycleTimeMs}
+    t={props.t}
+    lang={props.lang}
+  />
+);
+
+export const AutomaticSimulatorSection: React.FC<AutomaticSimulatorSectionProps> = (props) => {
   return (
     <section className="flex flex-col gap-4 md:gap-5 w-full min-w-0 select-none">
-      {/* 1. Interactive Canvas Stage */}
-      <CanvasStage
-        model={model}
-        state={state}
-        options={options}
-        onChangeOptions={onChangeOptions}
-        t={t}
-        lang={lang}
-      />
-
-      {/* 2. Simulation Controls & Scrubber */}
-      <SimulationControls
-        model={model}
-        state={state}
-        currentTimeMs={currentTimeMs}
-        totalTimeMs={totalTimeMs}
-        isPlaying={isPlaying}
-        speed={speed}
-        onTogglePlay={onTogglePlay}
-        onReset={onReset}
-        onStepNext={onStepNext}
-        onStepPrev={onStepPrev}
-        onScrubTime={onScrubTime}
-        onChangeSpeed={onChangeSpeed}
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenQr={onOpenQr}
-        t={t}
-        lang={lang}
-      />
-
-      {/* 3. Verification, KPIs & Details Table */}
-      <ValidationCard
-        model={model}
-        params={params}
-        totalCycleTimeMs={totalCycleTimeMs}
-        t={t}
-        lang={lang}
-      />
+      <CanvasControls {...props} />
+      <Results {...props} />
     </section>
   );
 };
