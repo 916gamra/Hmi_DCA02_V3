@@ -117,3 +117,125 @@ export function downloadFile(filename: string, content: string, mimeType: string
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
+
+export function parseJsonRecipeToParams(jsonStr: string): Partial<TrayParams> | null {
+  try {
+    const raw = JSON.parse(jsonStr);
+    if (!raw || typeof raw !== 'object') return null;
+
+    // 1. If it's a RecipePreset object: { params: { ... } }
+    if (raw.params && typeof raw.params.trayD === 'number') {
+      return raw.params as Partial<TrayParams>;
+    }
+
+    // 2. If it's an exported PLC JSON object: { geometry: { tray_diameter_mm: ... } }
+    if (raw.geometry && typeof raw.geometry.tray_diameter_mm === 'number') {
+      const g = raw.geometry;
+      const res: Partial<TrayParams> = {
+        trayD: g.tray_diameter_mm,
+        trayDDisplay: g.tray_diameter_mm,
+        tool: g.tool_diameter_mm || 3.5,
+        margin: g.outer_margin_mm ?? 25,
+        marginDisplay: g.outer_margin_mm ?? 25,
+        layers: g.concentric_layers_count || 4,
+        spacing: g.radial_spacing_mm || 19.5,
+        spacingDisplay: g.radial_spacing_mm || 19.5,
+      };
+      if (Array.isArray(raw.layers) && raw.layers.length > 0) {
+        res.custom = raw.layers.map((l: any) => ({
+          n: l.holes_total || 12,
+          off: l.offset_deg || 0,
+          stepAngle: l.step_angle_deg,
+        }));
+        res.mode = 'custom';
+      }
+      return res;
+    }
+
+    // 3. Compact QR format { M: 'TRAY3H', D: 350, ... }
+    if (raw.M === 'TRAY3H' || raw.D !== undefined) {
+      const res: Partial<TrayParams> = {};
+      if (typeof raw.D === 'number') {
+        res.trayD = raw.D;
+        res.trayDDisplay = raw.D;
+      }
+      if (typeof raw.T === 'number') res.tool = raw.T;
+      if (typeof raw.Mgn === 'number') {
+        res.margin = raw.Mgn;
+        res.marginDisplay = raw.Mgn;
+      }
+      if (typeof raw.L === 'number') res.layers = raw.L;
+      return res;
+    }
+
+    // 4. Raw TrayParams
+    if (typeof raw.trayD === 'number') {
+      return raw as Partial<TrayParams>;
+    }
+  } catch (e) {
+    console.warn('Failed to parse JSON recipe:', e);
+  }
+  return null;
+}
+
+export function parseCsvPointsToParams(csvContent: string): Partial<TrayParams> | null {
+  try {
+    const lines = csvContent
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    if (lines.length < 2) return null;
+
+    // Filter out header line
+    const dataLines = lines.filter((l) => !l.startsWith('Layer') && !l.startsWith('#'));
+    if (dataLines.length === 0) return null;
+
+    // Map rows: Layer, Point_Index, Head_ID, Head_Step, Angle_Deg, X_mm, Y_mm, Radius_mm
+    const layerRadiiMap = new Map<number, number>();
+    const layerHolesMap = new Map<number, number>();
+
+    dataLines.forEach((line) => {
+      const parts = line.split(',');
+      if (parts.length >= 8) {
+        const layerNum = parseInt(parts[0], 10);
+        const radius = parseFloat(parts[7]);
+        if (!isNaN(layerNum) && !isNaN(radius)) {
+          if (!layerRadiiMap.has(layerNum)) {
+            layerRadiiMap.set(layerNum, radius);
+            layerHolesMap.set(layerNum, 0);
+          }
+          layerHolesMap.set(layerNum, (layerHolesMap.get(layerNum) || 0) + 1);
+        }
+      }
+    });
+
+    const layerNums = Array.from(layerRadiiMap.keys()).sort((a, b) => a - b);
+    if (layerNums.length === 0) return null;
+
+    const r1 = layerRadiiMap.get(layerNums[0]) || 162.5;
+    const r2 = layerNums.length > 1 ? (layerRadiiMap.get(layerNums[1]) || r1 - 9.75) : r1 - 10;
+    const spacing = Number((Math.abs(r1 - r2) * 2).toFixed(1));
+    const margin = 25;
+    const trayD = Number((r1 * 2 + margin).toFixed(1));
+
+    const custom = layerNums.map((num) => ({
+      n: layerHolesMap.get(num) || 12,
+      off: 0,
+    }));
+
+    return {
+      trayD,
+      trayDDisplay: trayD,
+      margin,
+      marginDisplay: margin,
+      layers: Math.min(7, Math.max(1, layerNums.length)),
+      spacing: Math.max(1, spacing),
+      spacingDisplay: Math.max(1, spacing),
+      custom,
+      mode: 'custom',
+    };
+  } catch (e) {
+    console.warn('Failed to parse CSV points:', e);
+  }
+  return null;
+}

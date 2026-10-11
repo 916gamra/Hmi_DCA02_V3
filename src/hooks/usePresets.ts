@@ -24,7 +24,12 @@ export function usePresets(currentParams: TrayParams) {
   }, [customPresets]);
 
   const saveCustomPreset = useCallback(
-    (title: string, description: string, lang: 'ar' | 'fr' = 'ar') => {
+    (
+      title: string,
+      description: string,
+      lang: 'ar' | 'fr' = 'ar',
+      overrideParams?: TrayParams
+    ) => {
       const newPreset: RecipePreset = {
         id: `custom-recipe-${Date.now()}`,
         name: title,
@@ -33,7 +38,7 @@ export function usePresets(currentParams: TrayParams) {
         descriptionFr: description,
         tag: lang === 'ar' ? 'مخصصة 🌟' : 'Personnalisée 🌟',
         tagFr: 'Personnalisée 🌟',
-        params: { ...currentParams },
+        params: overrideParams ? { ...overrideParams } : { ...currentParams },
       };
       setCustomPresets((prev) => [newPreset, ...prev]);
       return newPreset;

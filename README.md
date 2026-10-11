@@ -1,13 +1,16 @@
-# 🫖 HMI Tray Designer — One UI 8
-### نظام المحاكاة الصناعية وتصميم صواني الشاي لآلات الحفر DCA ثلاثية الرؤوس (TouchWin HMI / PLC)
+# ⚙️ TRIVIUM - تريفيوم (HMI Tray Designer)
+### نظام الأتمتة والتحكم الرقمي CNC لآلة النقش ثلاثية الرؤوس الشعاعية للصواني الدائرية (TouchWin HMI / PLC)
 
 [![React 19](https://img.shields.io/badge/React-19.0-61dafb?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PWA Ready](https://img.shields.io/badge/PWA-100%25_Offline-5a0fc8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
-[![Vitest](https://img.shields.io/badge/Tests-Vitest_Passing-729b1b?logo=vitest&logoColor=white)](https://vitest.dev/)
-[![UI Style](https://img.shields.io/badge/Design-Samsung_One_UI_8_Light-2563eb)](https://developer.samsung.com/one-ui)
+[![UI Style](https://img.shields.io/badge/Design-TRIVIUM_CNC-f59e0b)](https://developer.samsung.com/one-ui)
 
 ---
+
+## 🏛️ فلسفة ومعنى اسم TRIVIUM (تريفيوم)
+في العصور الوسطى، كان **"التريفيوم" (Trivium)** يمثل أساس العقل والمعرفة: **النحو (Grammar) + المنطق (Logic) + البلاغة (Rhetoric)**. هي 3 طرق ومسارات تلتقي في عقل واحد. 
+تماماً مثل **رؤوس النقش الثلاثة الهندسية (@120°)** التي تلتقي في صينية دائرية مركزية واحدة. هذا هو الاسم الفلسفي العميق الذي يشرح الآلة: **3 مسارات منطقية متزامنة تنتج حقيقة فنية واحدة** (النقش المتناظر المتكامل).
 
 ## 📑 فهرس المحتويات (Table of Contents)
 1. [نظرة عامة ورؤية الأعمال (Executive Overview)](#-نظرة-عامة-ورؤية-الأعمال-executive-overview)

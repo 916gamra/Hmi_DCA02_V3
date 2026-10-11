@@ -13,11 +13,15 @@ export function fmtTime(ms: number): string {
   return `${s.toFixed(1)} ث`;
 }
 
-export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
+export function buildTimeline(m: TrayModel, tm?: TrayTiming): Timeline {
   const acts: TimelineAction[] = [];
   let t = 0;
   let th = 0;
   let rr = m.R;
+
+  const dLayer = tm && typeof tm.layer === 'number' && tm.layer > 0 ? tm.layer : 400;
+  const dIndex = tm && typeof tm.index === 'number' && tm.index > 0 ? tm.index : 120;
+  const dDwell = tm && typeof tm.dwell === 'number' && tm.dwell > 0 ? tm.dwell : 100;
 
   m.layers.forEach((L, i) => {
     // 1. Reposition drill heads radially to layer radius and initial angle offset
@@ -25,14 +29,14 @@ export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
     acts.push({
       type: 'repos',
       t0: t,
-      d: tm.layer,
+      d: dLayer,
       layer: i,
       r0: rr,
       r1: L.r,
       th0: th,
       th1: thS,
     });
-    t += tm.layer;
+    t += dLayer;
     rr = L.r;
     th = thS;
 
@@ -44,7 +48,7 @@ export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
         acts.push({
           type: 'index',
           t0: t,
-          d: tm.index,
+          d: dIndex,
           layer: i,
           j,
           r0: L.r,
@@ -52,7 +56,7 @@ export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
           th0: th,
           th1,
         });
-        t += tm.index;
+        t += dIndex;
         th = th1;
       }
 
@@ -60,7 +64,7 @@ export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
       acts.push({
         type: 'fire',
         t0: t,
-        d: tm.dwell,
+        d: dDwell,
         layer: i,
         j,
         r0: L.r,
@@ -68,11 +72,11 @@ export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
         th0: th,
         th1: th,
       });
-      t += tm.dwell;
+      t += dDwell;
     }
   });
 
-  return { acts, total: t };
+  return { acts, total: Math.max(t, 100) };
 }
 
 export function stateAt(t: number, timeline: Timeline, model: TrayModel): SimulationState {

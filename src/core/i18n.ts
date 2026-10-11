@@ -137,8 +137,8 @@ export interface Translations {
 
 export const translations: Record<Language, Translations> = {
   ar: {
-    appTitle: 'HMI Tray Designer',
-    appSubtitle: 'مصمم صواني الشاي الصناعي — 3 رؤوس متزامنة @ 0° / 120° / 240°',
+    appTitle: 'TRIVIUM120° (HMI Tray Designer)',
+    appSubtitle: 'Machine de gravure numérique pour plateaux circulaires à trois têtes radiales',
     badgeOneUi: 'One UI 8 Light',
     statusSafe: 'تصميم سليم ومتزامن 100%',
     statusWarn: 'تنبيه هندسي — راجع المسافات',
@@ -263,8 +263,8 @@ export const translations: Record<Language, Translations> = {
     btnPrintRecipe: 'طباعة ورقة الوصفة',
   },
   fr: {
-    appTitle: 'HMI Tray Designer',
-    appSubtitle: 'Conception industrielle de plateaux à thé — 3 têtes synchronisées @ 0° / 120° / 240°',
+    appTitle: 'TRIVIUM120° (HMI Tray Designer)',
+    appSubtitle: 'Machine de gravure numérique pour plateaux circulaires à trois têtes radiales',
     badgeOneUi: 'One UI 8 Light',
     statusSafe: 'Conception 100% conforme',
     statusWarn: 'Avertissement — Vérifier entraxes',

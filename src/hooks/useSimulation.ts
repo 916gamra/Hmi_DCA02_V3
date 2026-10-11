@@ -19,27 +19,34 @@ export function useSimulation({
   const [simTimeMs, setSimTimeMs] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState(initialSpeed);
-  const lastTimeRef = useRef<number>(0);
+
+  const speedRef = useRef(speed);
+  speedRef.current = speed;
+  const timelineRef = useRef(timeline);
+  timelineRef.current = timeline;
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   const simState = useMemo(() => {
-    if (simTimeMs <= 0) return null;
     return stateAt(simTimeMs, timeline, model);
   }, [simTimeMs, timeline, model]);
 
-  // Simulation Animation Loop
+  // Simulation Animation Loop (Smooth 60 FPS without render cancellations)
   useEffect(() => {
     if (!isPlaying) return;
 
     let animId: number;
-    lastTimeRef.current = performance.now();
+    let lastTime = performance.now();
 
     const loop = (now: number) => {
-      const dt = Math.min(100, now - lastTimeRef.current);
-      lastTimeRef.current = now;
+      const dt = Math.min(100, now - lastTime);
+      lastTime = now;
 
       setSimTimeMs((prev) => {
-        const next = prev + dt * speed;
-        if (next >= timeline.total) {
+        const curTotal = timelineRef.current.total;
+        if (!curTotal || curTotal <= 0) return prev;
+        const next = prev + dt * speedRef.current;
+        if (next >= curTotal) {
           setIsPlaying(false);
           try {
             confetti({
@@ -51,10 +58,10 @@ export function useSimulation({
           } catch (e) {
             console.warn('Confetti error:', e);
           }
-          if (onComplete) {
-            onComplete();
+          if (onCompleteRef.current) {
+            onCompleteRef.current();
           }
-          return timeline.total;
+          return curTotal;
         }
         return next;
       });
@@ -64,14 +71,18 @@ export function useSimulation({
 
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying, speed, timeline.total, onComplete]);
+  }, [isPlaying]);
 
   const togglePlay = useCallback(() => {
-    if (simTimeMs >= timeline.total) {
-      setSimTimeMs(0);
-    }
+    setSimTimeMs((prev) => {
+      const curTotal = timelineRef.current.total;
+      if (prev >= curTotal - 10) {
+        return 0;
+      }
+      return prev;
+    });
     setIsPlaying((prev) => !prev);
-  }, [simTimeMs, timeline.total]);
+  }, []);
 
   const resetSim = useCallback(() => {
     setIsPlaying(false);

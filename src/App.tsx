@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ViewOptions, RecipePreset } from './types';
+import { ViewOptions, RecipePreset, TrayParams } from './types';
 import { buildModel } from './core/model';
 import { buildTimeline } from './core/timeline';
 import { generatePlcJson, generateCsvPoints, downloadFile } from './core/recipe';
@@ -13,7 +13,11 @@ import { QrScannerModal } from './components/QrScannerModal';
 import { Toast } from './components/Toast';
 import { AutomaticSimulatorSection } from './components/AutomaticSimulatorSection';
 import { SaveArticleModal } from './components/SaveArticleModal';
+import { ImportChoiceModal } from './components/ImportChoiceModal';
+import { RecipePreviewModal } from './components/RecipePreviewModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { MachineTechModal } from './components/MachineTechModal';
+import { SplashScreen } from './components/SplashScreen';
 import { Language, translations } from './core/i18n';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import { useTrayParams, STORAGE_KEY } from './hooks/useTrayParams';
@@ -140,11 +144,26 @@ export default function App() {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isImportChoiceOpen, setIsImportChoiceOpen] = useState(false);
+  const [isTechModalOpen, setIsTechModalOpen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [previewRecipe, setPreviewRecipe] = useState<{
+    params: TrayParams;
+    sourceName: string;
+  } | null>(null);
+  const [pendingSavePresetParams, setPendingSavePresetParams] = useState<TrayParams | null>(null);
 
   // Handlers
   const handleUpdateParams = (updated: Partial<typeof params>) => {
     updateParams(updated);
     resetSim();
+  };
+
+  const handleRecipeParsed = (parsed: Partial<typeof params>, sourceName: string) => {
+    const fullParams: TrayParams = { ...params, ...parsed };
+    setPreviewRecipe({ params: fullParams, sourceName });
+    setIsImportChoiceOpen(false);
+    setIsQrScannerOpen(false);
   };
 
   const handleAutoCalculateSpacing = () => {
@@ -187,7 +206,11 @@ export default function App() {
   };
 
   const handleSaveCustomPreset = (title: string, description: string) => {
-    saveCustomPreset(title, description, lang);
+    const targetParams = pendingSavePresetParams || params;
+    saveCustomPreset(title, description, lang, targetParams);
+    setPendingSavePresetParams(null);
+    setPreviewRecipe(null);
+    setIsSaveModalOpen(false);
     showToast(
       lang === 'ar' ? 'تم حفظ الوصفة / المقال بنجاح' : 'Article / Recette enregistré avec succès'
     );
@@ -242,17 +265,17 @@ export default function App() {
         lang === 'ar' ? 'font-[var(--font-cairo)]' : 'font-[var(--font-sans)]'
       }`}
     >
+      {showSplash && <SplashScreen onEnter={() => setShowSplash(false)} lang={lang} />}
+
       {/* 1. Header (Always LTR layout as requested, respecting mobile notch safe-area) */}
       <Header
         model={model}
         lang={lang}
         t={t}
         onToggleLang={toggleLanguage}
-        onOpenQr={() => setIsQrOpen(true)}
         onOpenQrScanner={() => setIsQrScannerOpen(true)}
-        onExportJson={handleExportJson}
-        onExportCsv={handleExportCsv}
         onResetDefault={handleResetDefault}
+        onOpenTechModal={() => setIsTechModalOpen(true)}
       />
 
       {/* 2. Main Executive Content Container (Scrolls independently within 100dvh) */}
@@ -352,6 +375,7 @@ export default function App() {
                 (err) => showToast(err, 'error')
               )
             }
+            onOpenImportModal={() => setIsImportChoiceOpen(true)}
             onOpenQr={() => setIsQrOpen(true)}
             customPresets={customPresets}
           />
@@ -362,6 +386,41 @@ export default function App() {
       <BottomNavBar currentTab={mainTab} onChangeTab={setMainTab} t={t} />
 
       {/* 4. Modals & Notifications */}
+      {/* Import Choice Modal (JSON / CSV / QR Code) */}
+      <ImportChoiceModal
+        isOpen={isImportChoiceOpen}
+        onClose={() => setIsImportChoiceOpen(false)}
+        onRecipeParsed={handleRecipeParsed}
+        onTriggerQrScan={() => setIsQrScannerOpen(true)}
+        t={t}
+        lang={lang}
+      />
+
+      {/* Recipe Preview Modal with interactive Canvas, controls and Save button */}
+      {previewRecipe && (
+        <RecipePreviewModal
+          isOpen={!!previewRecipe}
+          onClose={() => setPreviewRecipe(null)}
+          previewParams={previewRecipe.params}
+          sourceName={previewRecipe.sourceName}
+          onOpenSaveModal={() => {
+            setPendingSavePresetParams(previewRecipe.params);
+            setIsSaveModalOpen(true);
+          }}
+          onApplyToSimulator={() => {
+            handleUpdateParams(previewRecipe.params);
+            setPreviewRecipe(null);
+            showToast(
+              lang === 'ar'
+                ? 'تم تطبيق القالب المستورد على المحاكي بنجاح'
+                : 'Modèle importé appliqué avec succès au simulateur'
+            );
+          }}
+          t={t}
+          lang={lang}
+        />
+      )}
+
       <QrCodeModal
         isOpen={isQrOpen}
         onClose={() => setIsQrOpen(false)}
@@ -374,12 +433,7 @@ export default function App() {
         isOpen={isQrScannerOpen}
         onClose={() => setIsQrScannerOpen(false)}
         onApplyRecipe={(scannedParams) => {
-          handleUpdateParams(scannedParams);
-          showToast(
-            lang === 'ar'
-              ? 'تم تطبيق معاملات الوصفة من رمز QR بنجاح'
-              : 'Paramètres appliqués depuis le code QR avec succès'
-          );
+          handleRecipeParsed(scannedParams, lang === 'ar' ? 'رمز QR' : 'Code QR');
         }}
         t={t}
         lang={lang}
@@ -390,6 +444,12 @@ export default function App() {
         onClose={() => setIsSaveModalOpen(false)}
         onSave={handleSaveCustomPreset}
         t={t}
+        lang={lang}
+      />
+
+      <MachineTechModal
+        isOpen={isTechModalOpen}
+        onClose={() => setIsTechModalOpen(false)}
         lang={lang}
       />
 

@@ -4,11 +4,11 @@ import {
   QrCode,
   Camera,
   RotateCcw,
-  FileSpreadsheet,
   CheckCircle2,
   AlertTriangle,
   XCircle,
   Languages,
+  Info,
 } from 'lucide-react';
 import { TrayModel } from '../types';
 import { Language, Translations } from '../core/i18n';
@@ -20,11 +20,9 @@ interface HeaderProps {
   lang: Language;
   t: Translations;
   onToggleLang: () => void;
-  onOpenQr: () => void;
-  onOpenQrScanner?: () => void;
-  onExportJson: () => void;
-  onExportCsv: () => void;
+  onOpenQrScanner: () => void;
   onResetDefault: () => void;
+  onOpenTechModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,11 +30,9 @@ export const Header: React.FC<HeaderProps> = ({
   lang,
   t,
   onToggleLang,
-  onOpenQr,
   onOpenQrScanner,
-  onExportJson,
-  onExportCsv,
   onResetDefault,
+  onOpenTechModal,
 }) => {
   return (
     <header
@@ -58,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {t.badgeOneUi}
               </span>
             </div>
-            <p className="text-[11px] text-[#64748b] hidden md:block truncate">
+            <p className="text-[10px] sm:text-[11px] text-[#64748b] block truncate">
               {t.appSubtitle}
             </p>
           </div>
@@ -89,6 +85,17 @@ export const Header: React.FC<HeaderProps> = ({
           {/* PWA Install Button (automatically shows when installable or on iOS) */}
           <PWAInstallButton lang={lang} />
 
+          {/* Quick QR Scanner Button (Pure Gray Icon) */}
+          <button
+            type="button"
+            onClick={onOpenQrScanner}
+            className="p-2 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer"
+            title={lang === 'ar' ? 'مسح واستقبال كود QR للوصفة' : 'Scanner QR pour recevoir recette'}
+            aria-label="QR Code Scanner"
+          >
+            <QrCode className="w-4 h-4" />
+          </button>
+
           {/* Language Switcher Button (AR <-> FR) */}
           <button
             type="button"
@@ -97,62 +104,25 @@ export const Header: React.FC<HeaderProps> = ({
             title={lang === 'ar' ? 'Passer en Français' : 'التحويل إلى العربية'}
           >
             <Languages className="w-3.5 h-3.5 text-[#2563eb]" />
-            <span className="font-mono">{lang === 'ar' ? 'FR' : 'عربي'}</span>
+            <span className="font-mono">{lang === 'ar' ? 'FR' : 'AR'}</span>
           </button>
 
-          {/* Quick QR Generator Button */}
+          {/* Technical Description Info Button (Gray, next to Reset) */}
           <button
             type="button"
-            onClick={onOpenQr}
-            className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-[#334155] bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1]/70 rounded-xl transition-all cursor-pointer select-none active:scale-95"
-            title={t.btnQr}
+            onClick={onOpenTechModal}
+            className="p-2 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer shrink-0"
+            title={lang === 'ar' ? 'الوصف التقني وفلسفة TRIVIUM' : 'Description technique et philosophie TRIVIUM'}
+            aria-label="TRIVIUM Machine Technical Description"
           >
-            <QrCode className="w-3.5 h-3.5 text-[#2563eb]" />
-            <span className="hidden sm:inline">{t.btnQr}</span>
-          </button>
-
-          {/* Quick QR Scanner Button */}
-          {onOpenQrScanner && (
-            <button
-              type="button"
-              onClick={onOpenQrScanner}
-              className="flex items-center gap-1 px-2 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-[#0f766e] bg-[#f0fdfa] hover:bg-[#ccfbf1] border border-[#99f6e4] rounded-xl transition-all cursor-pointer select-none active:scale-95"
-              title={lang === 'ar' ? 'مسح واستقبال كود QR' : 'Scanner QR'}
-            >
-              <Camera className="w-3.5 h-3.5 text-[#0d9488]" />
-              <span className="hidden md:inline">{lang === 'ar' ? 'مسح QR' : 'Scanner'}</span>
-            </button>
-          )}
-
-          {/* CSV Export */}
-          <button
-            type="button"
-            onClick={onExportCsv}
-            disabled={model.hasErr}
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 sm:py-2 text-xs font-semibold text-[#334155] bg-[#f1f5f9] hover:bg-[#e2e8f0] disabled:opacity-40 disabled:pointer-events-none border border-[#cbd5e1]/70 rounded-xl transition-all cursor-pointer select-none active:scale-95"
-            title={t.btnExportCsv}
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#059669]" />
-            <span>{t.btnExportCsv}</span>
-          </button>
-
-          {/* Export PLC Button */}
-          <button
-            type="button"
-            onClick={onExportJson}
-            disabled={model.hasErr}
-            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-white bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] hover:from-[#1d4ed8] hover:to-[#1e40af] disabled:opacity-40 disabled:pointer-events-none shadow-sm shadow-[#2563eb]/20 rounded-xl transition-all cursor-pointer select-none active:scale-95"
-            title={t.btnExportJson}
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="text-[11px] sm:text-xs">{t.btnExportJson}</span>
+            <Info className="w-4 h-4" />
           </button>
 
           {/* Reset Defaults */}
           <button
             type="button"
             onClick={onResetDefault}
-            className="p-1.5 sm:p-2 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer"
+            className="p-2 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer"
             title={t.btnReset}
             aria-label={t.btnReset}
           >

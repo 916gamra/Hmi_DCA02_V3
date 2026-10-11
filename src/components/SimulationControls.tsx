@@ -88,8 +88,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
           <button
             type="button"
             onClick={onTogglePlay}
-            disabled={model.hasErr}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold text-white transition-all cursor-pointer select-none active:scale-95 disabled:opacity-40 disabled:pointer-events-none shadow-xs ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold text-white transition-all cursor-pointer select-none active:scale-95 shadow-xs ${
               isPlaying
                 ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
                 : 'bg-[#2563eb] hover:bg-[#1d4ed8] shadow-[#2563eb]/20'

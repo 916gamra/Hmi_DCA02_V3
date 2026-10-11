@@ -4,6 +4,7 @@ import { PRESETS } from '../core/constants';
 import { TrayParams, TrayModel, RecipePreset } from '../types';
 import { TouchWinScreenMirror } from './TouchWinScreenMirror';
 import { ConfirmModal } from './ConfirmModal';
+import { ExportFormatModal } from './ExportFormatModal';
 import { Translations, Language } from '../core/i18n';
 import { downloadFile } from '../core/recipe';
 
@@ -15,7 +16,8 @@ interface ArticleRecipesPageProps {
   onApplyPreset: (preset: RecipePreset) => void;
   onDeletePreset: (presetId: string) => void;
   onExportPresets?: () => void;
-  onImportPresets: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onImportPresets?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenImportModal: () => void;
   onOpenQr: () => void;
   customPresets?: RecipePreset[];
 }
@@ -29,6 +31,7 @@ export const ArticleRecipesPage: React.FC<ArticleRecipesPageProps> = ({
   onDeletePreset,
   onExportPresets,
   onImportPresets,
+  onOpenImportModal,
   onOpenQr,
   customPresets = [],
 }) => {
@@ -47,6 +50,7 @@ export const ArticleRecipesPage: React.FC<ArticleRecipesPageProps> = ({
   );
 
   const [presetToDelete, setPresetToDelete] = useState<string | null>(null);
+  const [presetToExport, setPresetToExport] = useState<RecipePreset | null>(null);
 
   const handleSelectAndApply = (preset: RecipePreset) => {
     setSelectedPresetId(preset.id);
@@ -55,10 +59,7 @@ export const ArticleRecipesPage: React.FC<ArticleRecipesPageProps> = ({
 
   const handleExportSinglePreset = (preset: RecipePreset, e: React.MouseEvent) => {
     e.stopPropagation();
-    const cleanName = (lang === 'ar' ? preset.name : (preset.nameFr || preset.name))
-      .replace(/[^a-zA-Z0-9_\u0600-\u06FF-]/g, '_');
-    const dataStr = JSON.stringify(preset, null, 2);
-    downloadFile(`recipe_${cleanName}_D${preset.params.trayD}mm.json`, dataStr, 'application/json');
+    setPresetToExport(preset);
   };
 
   return (
@@ -72,6 +73,13 @@ export const ArticleRecipesPage: React.FC<ArticleRecipesPageProps> = ({
         }}
         title={lang === 'ar' ? 'تأكيد الحذف' : 'Confirmer la suppression'}
         message={lang === 'ar' ? 'هل أنت متأكد من حذف هذا القالب؟ لا يمكن التراجع عن هذا الإجراء.' : 'Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.'}
+        t={t}
+        lang={lang}
+      />
+      <ExportFormatModal
+        isOpen={!!presetToExport}
+        onClose={() => setPresetToExport(null)}
+        preset={presetToExport}
         t={t}
         lang={lang}
       />
@@ -92,13 +100,16 @@ export const ArticleRecipesPage: React.FC<ArticleRecipesPageProps> = ({
             </div>
           </div>
           
-          {/* Header Action: Only Import & Save to Device Storage */}
+          {/* Header Action: Open Import Choice Modal */}
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <label className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-xs font-bold text-white transition-all cursor-pointer shadow-xs active:scale-95">
-              <input type="file" accept=".json" className="hidden" onChange={onImportPresets} />
+            <button
+              type="button"
+              onClick={onOpenImportModal}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-xs font-bold text-white transition-all cursor-pointer shadow-xs active:scale-95"
+            >
               <Upload className="w-3.5 h-3.5" />
               <span>{lang === 'ar' ? 'استيراد قالب من ذاكرة الهاتف' : 'Importer depuis le téléphone'}</span>
-            </label>
+            </button>
           </div>
         </div>
       </div>

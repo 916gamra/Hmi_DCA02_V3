@@ -14,9 +14,9 @@ export default defineConfig(() => {
         includeAssets: ['favicon.ico', 'icon.svg', 'apple-touch-icon.png', 'icons/*.png'],
         manifest: {
           id: '/',
-          name: 'HMI Tray Designer — One UI 8',
-          short_name: 'HMI Tray',
-          description: 'محاكي وتصميم صواني الشاي الصناعية بنظام 3 رؤوس متزامنة',
+          name: 'TRIVIUM - تريفيوم',
+          short_name: 'TRIVIUM',
+          description: 'نظام الأتمتة والتحكم الرقمي CNC لآلة النقش ثلاثية الرؤوس الشعاعية للصواني الدائرية',
           theme_color: '#f4f6fb',
           background_color: '#f2f4f8',
           display: 'standalone',

@@ -268,22 +268,6 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
     }
   };
 
-  // Quick Demo / Test Recipe Simulation
-  const handleApplyDemoRecipe = () => {
-    const demoPayload = JSON.stringify({
-      M: 'TRAY3H',
-      D: 350,
-      T: 3.5,
-      Mgn: 25,
-      L: 4,
-      Holes: 96,
-      CycSec: 8,
-      Safe: 1,
-      Lays: 'L1:162.5mmx30pts@0.0°|L2:143.0mmx24pts@0.0°|L3:123.5mmx18pts@0.0°|L4:104.0mmx30pts@0.0°',
-    });
-    handleRecipeScanned(demoPayload);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -322,16 +306,6 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="leading-relaxed">{error}</p>
-            </div>
-            <div className="flex items-center gap-2 pt-1 border-t border-amber-200/60">
-              <button
-                type="button"
-                onClick={handleApplyDemoRecipe}
-                className="text-[11px] font-bold text-[#2563eb] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{lang === 'ar' ? 'تجربة وصفة نموذجية' : 'Tester recette démo'}</span>
-              </button>
             </div>
           </div>
         )}
@@ -424,25 +398,6 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({
                 </span>
               </div>
             </label>
-
-            {/* Quick Demo Recipe Button */}
-            <button
-              type="button"
-              onClick={handleApplyDemoRecipe}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 transition-all cursor-pointer text-left active:scale-98"
-            >
-              <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-[#0f172a]">
-                  {lang === 'ar' ? 'تجربة وصفة نموذجية فورية' : 'Appliquer une recette démo'}
-                </span>
-                <span className="text-[10px] text-[#64748b] truncate block">
-                  {lang === 'ar' ? 'اختبار قارئ TouchWin بنقرة واحدة' : 'Test sans caméra'}
-                </span>
-              </div>
-            </button>
           </div>
         )}
       </div>
