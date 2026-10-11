@@ -75,6 +75,7 @@ export function buildModel(p: TrayParams): TrayModel {
       // custom mode
       const cfg = p.custom[i] || { n: p.rawBase, off: i * p.addAngle };
       off = cfg.off || 0;
+      // Note: stepAngle and n must be kept synchronized from the UI layer.
       if (cfg.stepAngle && cfg.stepAngle > 0) {
         rawN = Math.round(360 / cfg.stepAngle);
         n = sanitizeN(rawN);

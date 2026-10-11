@@ -152,9 +152,25 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
     while (nextCustom.length < params.layers) {
       nextCustom.push({ n: params.rawBase, off: nextCustom.length * params.addAngle });
     }
+    const n = sanitizeN(val);
     nextCustom[index] = {
       ...nextCustom[index],
-      n: sanitizeN(val),
+      n,
+      stepAngle: 360 / n,
+    };
+    onChange({ custom: nextCustom });
+  };
+
+  const handleCustomLayerStepAngle = (index: number, val: number) => {
+    const nextCustom = [...params.custom];
+    while (nextCustom.length < params.layers) {
+      nextCustom.push({ n: params.rawBase, off: nextCustom.length * params.addAngle });
+    }
+    const n = sanitizeN(Math.round(360 / val));
+    nextCustom[index] = {
+      ...nextCustom[index],
+      n,
+      stepAngle: 360 / n,
     };
     onChange({ custom: nextCustom });
   };
@@ -664,10 +680,10 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <div>
                             <span className="text-[10px] text-[#64748b] block mb-1">
-                              {t.customModePoints} ({c.n / 3}/{lang === 'ar' ? 'رأس' : 'tête'})
+                              {t.customModePoints}
                             </span>
                             <NumberStepper
                               value={c.n}
@@ -681,14 +697,27 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
 
                           <div>
                             <span className="text-[10px] text-[#64748b] block mb-1">
-                              {t.customModeOffset}
+                              {t.customModeStepAngle} (°)
+                            </span>
+                            <NumberStepper
+                              value={Math.round((c.stepAngle || 360 / c.n) * 10) / 10}
+                              min={3}
+                              max={120}
+                              step={0.5}
+                              size="small"
+                              onChange={(val) => handleCustomLayerStepAngle(idx, val)}
+                            />
+                          </div>
+
+                          <div>
+                            <span className="text-[10px] text-[#64748b] block mb-1">
+                              {t.customModeOffset} (°)
                             </span>
                             <NumberStepper
                               value={c.off}
                               min={-90}
                               max={90}
                               step={0.5}
-                              unit="°"
                               size="small"
                               onChange={(val) => handleCustomLayerOffset(idx, val)}
                             />

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { TrayModel } from '../types';
-import { buildModel } from '../core/model';
 import { renderCanvas } from '../core/render';
 import { Language } from '../core/i18n';
+import { trayData } from '../core/splashTrayData';
 
 interface SplashScreenProps {
   onEnter: () => void;
@@ -15,27 +14,43 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onEnter, lang }) => 
   const isAr = lang === 'ar';
 
   useEffect(() => {
-    // Default minimalist preview tray params
-    const model = buildModel({
-      trayD: 120,
-      tool: 3,
-      margin: 15,
-      layers: 3,
-      spacing: 15,
-      mode: 'all',
-      rawBase: 12,
-      addAngle: 5,
-      custom: [],
-      timing: { dwell: 100, index: 50, layer: 200 }
-    } as any); // Casting to any to bypass complex type requirements for this minimal preview
-
     const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        renderCanvas(ctx, 160, 160, 2, model, null, { sectors: true, heads: true, rings: true, labels: false }, 1, 0, 0, null);
-      }
-    }
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let frameId: number;
+    let startTime: number | null = null;
+    const duration = 20000; // Total cycle duration in ms
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = ((timestamp - startTime) / duration) % 1;
+      const theta = progress * 360; // Rotating at defined speed
+
+      // Construct simulation state for renderer
+      const state = {
+        theta: theta,
+        headR: 195, // Radius of head rail
+        counts: [6, 6, 6, 6], // Drilled count per layer
+        cur: { type: 'fire', layer: 0, j: 0 },
+        done: false,
+        u: 0
+      };
+
+      const model = {
+        R: 195,
+        toolR: 10,
+        layers: trayData.layers.map((l, i) => ({ ...l, i })),
+      };
+
+      renderCanvas(ctx, 480, 480, 2, model as any, state as any, { sectors: true, heads: true, rings: true, labels: false }, 1, 0, 0, null);
+      frameId = requestAnimationFrame(animate);
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   useEffect(() => {
@@ -44,7 +59,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onEnter, lang }) => 
       setTimeout(() => {
         onEnter();
       }, 350);
-    }, 1400);
+    }, 3000); // Increased duration slightly
 
     return () => clearTimeout(timer);
   }, [onEnter]);
@@ -58,8 +73,8 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onEnter, lang }) => 
     >
       <div className="flex flex-col items-center space-y-4 animate-scale-up">
         {/* Simulator Preview Canvas */}
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-xl shadow-blue-500/20 border border-blue-400/20 bg-white">
-          <canvas ref={canvasRef} width={320} height={320} className="w-full h-full" />
+        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-3xl overflow-hidden shadow-xl shadow-blue-500/20 border border-blue-400/20 bg-white">
+          <canvas ref={canvasRef} width={480} height={480} className="w-full h-full" />
         </div>
 
         {/* App Name */}

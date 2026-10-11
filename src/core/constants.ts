@@ -19,80 +19,72 @@ export const LAYER_COLORS = [
 ];
 
 export const DEFAULT_PARAMS: TrayParams = {
-  trayD: 350, // 35 cm = 350 mm
-  trayDDisplay: 35,
+  trayD: 390,
+  trayDDisplay: 39,
   trayU: 'cm',
-  tool: 3.5, // mm
-  margin: 25, // 25 mm
-  marginDisplay: 2.5,
+  tool: 20,
+  margin: 90,
+  marginDisplay: 9,
   marginU: 'cm',
-  layers: 4, // TouchWin active layers (max 7)
-  spacing: 39, // TouchWin expansion length 39MM
-  spacingDisplay: 39,
+  layers: 4,
+  spacing: 76.3,
+  spacingDisplay: 76.3,
   spacingU: 'mm',
-  rLast: 183, // Last layer diameter in mm (300 - 3*39 = 183mm)
-  rLastDisplay: 183,
+  rLast: 35.55,
+  rLastDisplay: 35.55,
   rLastU: 'mm',
   mode: 'custom',
-  rawBase: 12,
+  rawBase: 6,
   addAngle: 0,
   custom: [
-    { n: 30, off: 0, stepAngle: 12.0 }, // 1 rotation angle 12.0 -> 30 holes
-    { n: 24, off: 0, stepAngle: 15.0 }, // 2 rotation angle 15.0 -> 24 holes
-    { n: 18, off: 0, stepAngle: 20.0 }, // 3 rotation angle 20.0 -> 18 holes
-    { n: 30, off: 0, stepAngle: 12.0 }, // 4 rotation angle 12.0 -> 30 holes
-    { n: 24, off: 0, stepAngle: 15.0 }, // 5 (disabled if layers < 5)
-    { n: 18, off: 0, stepAngle: 20.0 }, // 6 (disabled if layers < 6)
-    { n: 0, off: 0, stepAngle: 0.0 },   // 7 rotation angle 0.0
+    { n: 6, off: -4.5, stepAngle: 60 },
+    { n: 6, off: 6.5, stepAngle: 60 },
+    { n: 6, off: 20, stepAngle: 60 },
+    { n: 6, off: 38.5, stepAngle: 60 },
   ],
   timing: {
-    dwell: 100, // TouchWin deflower time 0.10 S = 100 ms
-    index: 120, // ms
-    layer: 400, // ms
-    rampExpansionSec: 0.08, // mechanical servo settling ramp overhead in s
-    rampRotationSec: 0.035,  // rotational acceleration/settling overhead in s
+    dwell: 100,
+    index: 120,
+    layer: 400,
   },
   rotationSpeedHz: 800,
   expansionSpeedHz: 800,
-  pulsesPerRev: 10000,
-  pulsesPerMm: 100,
   timingMode: 'hz',
   speed: 1,
 };
 
 export const PRESETS: RecipePreset[] = [
   {
-    id: 'touchwin-actual-machine',
-    name: 'وصفة شاشة الآلة الفعلية (TouchWin 4L - 39mm)',
-    nameFr: 'Recette Écran Machine Réelle (TouchWin 4L - 39mm)',
-    description: 'الوصفة الحقيقية المأخوذة مباشرة من شاشات TouchWin: 4 طبقات (12° / 15° / 20° / 12°) بتباعد 39 مم وزمن 0.10 ثانية',
-    descriptionFr: 'Recette réelle issue des écrans TouchWin : 4 couches (12° / 15° / 20° / 12°), espacement 39 mm, dwell 0.10 S',
-    tag: 'شاشة الآلة 🎯',
-    tagFr: 'Écran Machine 🎯',
+    id: 'spiral-4layer-390mm',
+    name: 'تصميم حلزوني 4 طبقات (390 مم)',
+    nameFr: 'Design Spiral 4 Couches (390 mm)',
+    description: 'تصميم حلزوني عالي الدقة بـ 4 طبقات، القطر 390 مم مع 6 نقاط لكل طبقة',
+    descriptionFr: 'Design spiral haute précision à 4 couches, diamètre 390 mm, 6 points par couche.',
+    tag: 'تصميم احترافي',
+    tagFr: 'Design Professionnel',
     params: {
-      trayD: 350,
-      trayDDisplay: 35,
+      trayD: 390,
+      trayDDisplay: 39,
       trayU: 'cm',
-      tool: 3.5,
-      margin: 25,
-      marginDisplay: 2.5,
+      tool: 20,
+      margin: 90,
+      marginDisplay: 9,
       marginU: 'cm',
       layers: 4,
-      spacing: 39,
-      spacingDisplay: 39,
+      spacing: 76.3,
+      spacingDisplay: 76.3,
       spacingU: 'mm',
-      rLast: 183,
-      rLastDisplay: 183,
+      rLast: 35.55,
+      rLastDisplay: 35.55,
       rLastU: 'mm',
       mode: 'custom',
+      rawBase: 6,
+      addAngle: 0,
       custom: [
-        { n: 30, off: 0, stepAngle: 12.0 },
-        { n: 24, off: 0, stepAngle: 15.0 },
-        { n: 18, off: 0, stepAngle: 20.0 },
-        { n: 30, off: 0, stepAngle: 12.0 },
-        { n: 0, off: 0, stepAngle: 0.0 },
-        { n: 0, off: 0, stepAngle: 0.0 },
-        { n: 0, off: 0, stepAngle: 0.0 },
+        { n: 6, off: -4.5, stepAngle: 60 },
+        { n: 6, off: 6.5, stepAngle: 60 },
+        { n: 6, off: 20, stepAngle: 60 },
+        { n: 6, off: 38.5, stepAngle: 60 },
       ],
       timing: {
         dwell: 100,
@@ -103,6 +95,7 @@ export const PRESETS: RecipePreset[] = [
       expansionSpeedHz: 800,
     },
   },
+  // ... rest of the existing presets
   {
     id: 'standard-tea-tray',
     name: 'صينية شاي كلاسيكية (30 سم - 4 طبقات)',
