@@ -9,11 +9,11 @@ interface PWAInstallButtonProps {
 }
 
 export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ lang = 'ar' }) => {
-  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const { isInstallable, isInstalled, isIOS, install, installStatus } = usePWAInstall();
   const [showGuide, setShowGuide] = useState(false);
   const [installSuccess, setInstallSuccess] = useState(false);
 
-  if (isInstalled || installSuccess) {
+  if (installStatus === 'installed' || installSuccess) {
     return (
       <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl shadow-2xs shrink-0 select-none">
         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -23,7 +23,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({ lang = 'ar' 
   }
 
   const handleClick = async () => {
-    if (isInstallable) {
+    if (installStatus === 'ready') {
       const success = await install();
       if (success) {
         setInstallSuccess(true);

@@ -77,6 +77,12 @@ export const ExportFormatModal: React.FC<ExportFormatModalProps> = ({
     onClose();
   };
 
+  const handleExportGCode = () => {
+    const gcodeStr = generateRecipeGCode(fullParams, model);
+    downloadFile(`recipe_${cleanName}.gcode`, gcodeStr, 'text/plain;charset=utf-8');
+    onClose();
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200 select-none"
@@ -181,6 +187,25 @@ export const ExportFormatModal: React.FC<ExportFormatModalProps> = ({
               </span>
               <span className="text-[11px] text-[#64748b] block">
                 {lang === 'ar' ? 'ملف نصي يلخص إعدادات الآلة وأوقات الدورة' : 'Résumé technique imprimable'}
+              </span>
+            </div>
+          </button>
+
+          {/* G-Code Option */}
+          <button
+            type="button"
+            onClick={handleExportGCode}
+            className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] hover:border-orange-600 hover:bg-orange-50/40 transition-all cursor-pointer text-left active:scale-98 group"
+          >
+            <div className="w-11 h-11 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+              <FileText className="w-5.5 h-5.5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="block text-xs font-bold text-[#0f172a]">
+                {lang === 'ar' ? 'وصفة G-code (.gcode)' : 'Recette G-code'}
+              </span>
+              <span className="text-[11px] text-[#64748b] block">
+                {lang === 'ar' ? 'ملف تعريف كامل للآلة (زوايا، سرعات، توقيت)' : 'Fichier machine complet'}
               </span>
             </div>
           </button>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ViewOptions, RecipePreset, TrayParams } from './types';
 import { buildModel } from './core/model';
 import { buildTimeline } from './core/timeline';
-import { generatePlcJson, generateCsvPoints, downloadFile } from './core/recipe';
+import { generatePlcJson, generateCsvPoints, downloadFile, generateRecipeGCode } from './core/recipe';
 import { Header } from './components/Header';
 import { ParametersPanel } from './components/ParametersPanel';
 import { ManualModePage } from './components/ManualModePage';
@@ -255,6 +255,25 @@ export default function App() {
       lang === 'ar'
         ? 'تم تصدير جدول نقاط الحفر CSV بنجاح'
         : 'Fichier des points CSV exporté avec succès'
+    );
+  };
+
+  const handleExportGCode = () => {
+    if (model.hasErr) {
+      showToast(
+        lang === 'ar'
+          ? 'تعذر التصدير: يحتوي التصميم على أخطاء تداخل هندسية.'
+          : 'Export impossible : collisions détectées.',
+        'error'
+      );
+      return;
+    }
+    const gcodeStr = generateRecipeGCode(params, model);
+    downloadFile(`tray_recipe_D${params.trayD}mm.gcode`, gcodeStr, 'text/plain;charset=utf-8');
+    showToast(
+      lang === 'ar'
+        ? 'تم تصدير وصفة G-code بنجاح'
+        : 'Recette G-code exportée avec succès'
     );
   };
 

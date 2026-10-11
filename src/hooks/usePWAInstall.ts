@@ -53,10 +53,19 @@ export function usePWAInstall() {
     return false;
   };
 
+  const installStatus: 'ready' | 'unsupported' | 'ios' | 'installed' | 'unavailable' = isInstalled
+    ? 'installed'
+    : isIOS
+    ? 'ios'
+    : !!deferredPrompt
+    ? 'ready'
+    : 'unavailable';
+
   return {
     isInstallable: !!deferredPrompt,
     isInstalled,
     isIOS,
     install,
+    installStatus,
   };
 }

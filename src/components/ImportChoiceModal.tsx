@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { FileJson, FileSpreadsheet, QrCode, X, Upload, AlertCircle } from 'lucide-react';
+import { FileJson, FileSpreadsheet, QrCode, X, Upload, AlertCircle, FileText } from 'lucide-react';
 import { TrayParams } from '../types';
-import { parseJsonRecipeToParams, parseCsvPointsToParams } from '../core/recipe';
+import { parseJsonRecipeToParams, parseCsvPointsToParams, parseRecipeGCode } from '../core/recipe';
 import { Translations, Language } from '../core/i18n';
 
 interface ImportChoiceModalProps {
@@ -23,6 +23,7 @@ export const ImportChoiceModal: React.FC<ImportChoiceModalProps> = ({
 }) => {
   const jsonInputRef = useRef<HTMLInputElement | null>(null);
   const csvInputRef = useRef<HTMLInputElement | null>(null);
+  const gcodeInputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -51,7 +52,7 @@ export const ImportChoiceModal: React.FC<ImportChoiceModalProps> = ({
     e.target.value = '';
   };
 
-  const handleCsvFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleGcodeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     const file = e.target.files?.[0];
     if (!file) return;
@@ -59,15 +60,15 @@ export const ImportChoiceModal: React.FC<ImportChoiceModalProps> = ({
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      const parsed = parseCsvPointsToParams(content);
-      if (parsed) {
+      const result = parseRecipeGCode(content);
+      if (result.params) {
         onClose();
-        onRecipeParsed(parsed, file.name.replace(/\.csv$/i, ''));
+        onRecipeParsed(result.params, file.name.replace(/\.(gcode|txt)$/i, ''));
       } else {
         setError(
           lang === 'ar'
-            ? 'تعذر استخراج بيانات الحفر من ملف CSV. تأكد من تطابق أعمدة الطبقات والإحداثيات.'
-            : 'Impossible d\'extraire les coordonnées depuis ce fichier CSV.'
+            ? `خطأ في استيراد G-code: ${result.error}`
+            : `Erreur d'import G-code : ${result.error}`
         );
       }
     };
@@ -128,6 +129,13 @@ export const ImportChoiceModal: React.FC<ImportChoiceModalProps> = ({
           className="hidden"
           onChange={handleCsvFile}
         />
+        <input
+          ref={gcodeInputRef}
+          type="file"
+          accept=".gcode,.txt"
+          className="hidden"
+          onChange={handleGcodeFile}
+        />
 
         {/* 3 Import Choice Buttons */}
         <div className="flex flex-col gap-3">
@@ -165,6 +173,25 @@ export const ImportChoiceModal: React.FC<ImportChoiceModalProps> = ({
               </span>
               <span className="text-[11px] text-[#64748b] block truncate">
                 {lang === 'ar' ? 'استيراد إحداثيات ثقوب الحفر والطبقات' : 'Coordonnées de perçage CSV'}
+              </span>
+            </div>
+          </button>
+
+          {/* 3. G-code Option */}
+          <button
+            type="button"
+            onClick={() => gcodeInputRef.current?.click()}
+            className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-[#f8fafc] border border-[#e2e8f0] hover:border-[#ea580c] hover:bg-orange-50/40 transition-all cursor-pointer text-left active:scale-98"
+          >
+            <div className="w-11 h-11 rounded-xl bg-orange-100 text-[#ea580c] flex items-center justify-center shrink-0">
+              <FileText className="w-5.5 h-5.5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="block text-xs font-bold text-[#0f172a]">
+                {lang === 'ar' ? 'ملف وصفة G-code (.gcode/.txt)' : 'Fichier Recette G-code'}
+              </span>
+              <span className="text-[11px] text-[#64748b] block truncate">
+                {lang === 'ar' ? 'استيراد معاملات الآلة والزوايا' : 'Import des paramètres machine'}
               </span>
             </div>
           </button>

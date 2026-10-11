@@ -683,7 +683,7 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
                         <div className="grid grid-cols-3 gap-2">
                           <div>
                             <span className="text-[10px] text-[#64748b] block mb-1">
-                              {t.customModePoints}
+                              {t.customModePoints} (n)
                             </span>
                             <NumberStepper
                               value={c.n}

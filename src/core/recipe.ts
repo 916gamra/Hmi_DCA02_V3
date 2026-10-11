@@ -1,5 +1,6 @@
 import { TrayParams, TrayModel } from '../types';
 import { HEADS } from './constants';
+import { parseRecipeV1 } from './recipeFormat';
 
 export function generatePlcJson(p: TrayParams, model: TrayModel, totalCycleMs: number): string {
   const data = {
@@ -106,6 +107,80 @@ export function generateCompactQrPayload(p: TrayParams, model: TrayModel, totalC
   return JSON.stringify(compact);
 }
 
+export function generateRecipeGCode(p: TrayParams, model?: TrayModel): string {
+  const lines = [
+    '; TRIVIUM-GCODE-v1',
+    '; name: Exported Recipe',
+    'FORMAT=TRIVIUM-GCODE-v1',
+    `TRAY_D=${p.trayD.toFixed(3)}`,
+    `TOOL=${p.tool.toFixed(3)}`,
+    `MARGIN=${p.margin.toFixed(3)}`,
+    `LAYERS=${p.layers}`,
+    `SPACING=${p.spacing.toFixed(3)}`,
+    `MODE=${p.mode}`,
+    `ROT_HZ=${(p.rotationSpeedHz ?? 800).toFixed(3)}`,
+    `EXP_HZ=${(p.expansionSpeedHz ?? 800).toFixed(3)}`,
+    `DWELL_MS=${p.timing.dwell}`,
+    `INDEX_MS=${p.timing.index}`,
+    `LAYER_MS=${p.timing.layer}`,
+  ];
+
+  if (p.custom) {
+    p.custom.forEach((c, i) => {
+      lines.push(`L${i + 1}_N=${c.n} L${i + 1}_STEP=${(c.stepAngle ?? 360/c.n).toFixed(4)} L${i + 1}_OFF=${c.off.toFixed(4)}`);
+    });
+  }
+
+  return lines.join('\n');
+}
+
+export function parseRecipeGCode(text: string): { params: Partial<TrayParams> | null; error?: string } {
+  const params: Partial<TrayParams> = { timing: { dwell: 100, index: 120, layer: 400 } };
+  const custom: Array<{ n: number; off: number; stepAngle?: number }> = [];
+
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith(';'));
+  
+  try {
+    lines.forEach(line => {
+      if (line.startsWith('TRAY_D=')) params.trayD = params.trayDDisplay = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('TOOL=')) params.tool = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('MARGIN=')) params.margin = params.marginDisplay = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('LAYERS=')) params.layers = parseInt(line.split('=')[1], 10);
+      else if (line.startsWith('SPACING=')) params.spacing = params.spacingDisplay = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('MODE=')) params.mode = line.split('=')[1] as any;
+      else if (line.startsWith('ROT_HZ=')) params.rotationSpeedHz = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('EXP_HZ=')) params.expansionSpeedHz = parseFloat(line.split('=')[1]);
+      else if (line.startsWith('DWELL_MS=')) params.timing!.dwell = parseInt(line.split('=')[1], 10);
+      else if (line.startsWith('INDEX_MS=')) params.timing!.index = parseInt(line.split('=')[1], 10);
+      else if (line.startsWith('LAYER_MS=')) params.timing!.layer = parseInt(line.split('=')[1], 10);
+      else if (line.includes('_N=')) {
+        const parts = line.split(' ');
+        const c: any = {};
+        parts.forEach(p => {
+          const [key, val] = p.split('=');
+          if (key.endsWith('_N')) c.n = parseInt(val, 10);
+          else if (key.endsWith('_STEP')) c.stepAngle = parseFloat(val);
+          else if (key.endsWith('_OFF')) c.off = parseFloat(val);
+        });
+        custom.push(c);
+      }
+    });
+
+    // Validation
+    if (params.trayD !== undefined && (params.trayD < 50 || params.trayD > 2000)) {
+        return { params: null, error: 'Tray diameter out of range (50-2000mm)' };
+    }
+    if (params.layers !== undefined && (params.layers < 1 || params.layers > 7)) {
+        return { params: null, error: 'Layers must be between 1 and 7' };
+    }
+
+    if (custom.length > 0) params.custom = custom;
+    return { params };
+  } catch (e) {
+    return { params: null, error: 'Failed to parse G-code' };
+  }
+}
+
 export function downloadFile(filename: string, content: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -119,6 +194,10 @@ export function downloadFile(filename: string, content: string, mimeType: string
 }
 
 export function parseJsonRecipeToParams(jsonStr: string): Partial<TrayParams> | null {
+  // 0. Try new V1 format first
+  const v1 = parseRecipeV1(jsonStr);
+  if (v1.ok && v1.params) return v1.params;
+
   try {
     const raw = JSON.parse(jsonStr);
     if (!raw || typeof raw !== 'object') return null;
