@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="pwaTrayRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#38bdf8" />
+      <stop offset="50%" stopColor="#2563eb" />
+      <stop offset="100%" stopColor="#4f46e5" />
+    </linearGradient>
+    <filter id="pwaHeadGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#0f172a" floodOpacity="0.18" />
+    </filter>
+  </defs>
+
+  {/* Light One UI 8 Squircle Background */}
+  <rect width="512" height="512" rx="128" fill="#f8fafc" stroke="#e2e8f0" stroke-width="4"/>
+
+  {/* 3 Dashed 120° Radial Axes */}
+  <line x1="256" y1="256" x2="256" y2="60" stroke="#94a3b8" stroke-width="3.5" stroke-dasharray="8 7" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="86" y2="354" stroke="#94a3b8" stroke-width="3.5" stroke-dasharray="8 7" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="426" y2="354" stroke="#94a3b8" stroke-width="3.5" stroke-dasharray="8 7" stroke-linecap="round"/>
+
+  {/* Outer Solid Tray Rim */}
+  <circle cx="256" cy="256" r="192" fill="#ffffff" stroke="url(#pwaTrayRimGrad)" stroke-width="28"/>
+
+  {/* 4 Concentric Dashed Drilling Layers */}
+  {/* Layer 1 (Amber L1) */}
+  <circle cx="256" cy="256" r="156" fill="none" stroke="#f59e0b" stroke-width="14" stroke-linecap="round" stroke-dasharray="20 15"/>
+  {/* Layer 2 (Emerald L2) */}
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#10b981" stroke-width="14" stroke-linecap="round" stroke-dasharray="20 15"/>
+  {/* Layer 3 (Cyan L3) */}
+  <circle cx="256" cy="256" r="86" fill="none" stroke="#06b6d4" stroke-width="13" stroke-linecap="round" stroke-dasharray="18 13"/>
+  {/* Layer 4 (Inner Blue L4 - The 4th layer) */}
+  <circle cx="256" cy="256" r="54" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" stroke-dasharray="15 11"/>
+
+  {/* Center Machine Core Hub */}
+  <circle cx="256" cy="256" r="28" fill="#f43f5e" stroke="#ffffff" stroke-width="5"/>
+  <circle cx="256" cy="256" r="9" fill="#ffffff" opacity="0.95"/>
+
+  {/* The 3 Triangle Machine Drill Heads */}
+  {/* Head 1 (Top Cyan Triangle T1) */}
+  <polygon points="256,6 220,62 292,62" fill="#06b6d4" stroke="#0284c7" stroke-width="5" stroke-linejoin="round" filter="url(#pwaHeadGlow)"/>
+
+  {/* Head 2 (Bottom-Left Orange Triangle T2) */}
+  <polygon points="39,381 70,323 105,384" fill="#f97316" stroke="#ea580c" stroke-width="5" stroke-linejoin="round" filter="url(#pwaHeadGlow)"/>
+
+  {/* Head 3 (Bottom-Right Emerald Triangle T3) */}
+  <polygon points="473,381 407,384 442,323" fill="#10b981" stroke="#059669" stroke-width="5" stroke-linejoin="round" filter="url(#pwaHeadGlow)"/>
+</svg>

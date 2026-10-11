@@ -1,0 +1,115 @@
+import { TrayModel, TrayTiming, Timeline, TimelineAction, SimulationState } from '../types';
+
+export const ease = (u: number): number =>
+  u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u);
+
+export function fmtTime(ms: number): string {
+  const s = ms / 1000;
+  if (s >= 60) {
+    const mins = Math.floor(s / 60);
+    const secs = Math.round(s % 60);
+    return `${mins} د ${secs} ث`;
+  }
+  return `${s.toFixed(1)} ث`;
+}
+
+export function buildTimeline(m: TrayModel, tm: TrayTiming): Timeline {
+  const acts: TimelineAction[] = [];
+  let t = 0;
+  let th = 0;
+  let rr = m.R;
+
+  m.layers.forEach((L, i) => {
+    // 1. Reposition drill heads radially to layer radius and initial angle offset
+    const thS = -L.off;
+    acts.push({
+      type: 'repos',
+      t0: t,
+      d: tm.layer,
+      layer: i,
+      r0: rr,
+      r1: L.r,
+      th0: th,
+      th1: thS,
+    });
+    t += tm.layer;
+    rr = L.r;
+    th = thS;
+
+    // 2. Drill all points for each head in this layer
+    for (let j = 0; j < L.per; j++) {
+      if (j > 0) {
+        // Rotate tray index step
+        const th1 = th - L.step;
+        acts.push({
+          type: 'index',
+          t0: t,
+          d: tm.index,
+          layer: i,
+          j,
+          r0: L.r,
+          r1: L.r,
+          th0: th,
+          th1,
+        });
+        t += tm.index;
+        th = th1;
+      }
+
+      // Synchronized drill fire (all 3 heads simultaneously plunge and retract)
+      acts.push({
+        type: 'fire',
+        t0: t,
+        d: tm.dwell,
+        layer: i,
+        j,
+        r0: L.r,
+        r1: L.r,
+        th0: th,
+        th1: th,
+      });
+      t += tm.dwell;
+    }
+  });
+
+  return { acts, total: t };
+}
+
+export function stateAt(t: number, timeline: Timeline, model: TrayModel): SimulationState {
+  const acts = timeline.acts;
+  const counts = new Array(model.layers.length).fill(0);
+  let theta = 0;
+  let headR = model.R;
+  let cur: TimelineAction | null = null;
+  let u = 0;
+  let done = false;
+
+  for (let q = 0; q < acts.length; q++) {
+    const a = acts[q];
+    if (t >= a.t0 + a.d) {
+      theta = a.th1;
+      headR = a.r1;
+      if (a.type === 'fire' && a.j !== undefined) {
+        counts[a.layer] = a.j + 1;
+      }
+      if (q === acts.length - 1) {
+        done = true;
+        cur = a;
+      }
+    } else {
+      if (t >= a.t0) {
+        u = (t - a.t0) / a.d;
+        const e = a.type === 'fire' ? u : ease(u);
+        theta = a.th0 + (a.th1 - a.th0) * e;
+        headR = a.r0 + (a.r1 - a.r0) * e;
+        if (a.type === 'fire' && a.j !== undefined) {
+          counts[a.layer] = a.j + 1;
+        }
+        cur = a;
+      }
+      break;
+    }
+  }
+
+  return { theta, headR, counts, cur, u, done };
+}
