@@ -24,12 +24,9 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
   onAutoCalculateSpacing,
 }) => {
   const t = propT || translations[lang];
-  const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({
-    geo: false,
-    rings: false,
-    pts: false,
-    timing: false,
-  });
+  const [openSection, setOpenSection] = React.useState<
+    'geo' | 'rings' | 'pts' | 'timing' | null
+  >('geo');
 
   // D1 (قطر أول حلقة) = قطر الصينية ناقص الهامش (حيث الهامش هو أول تباعد يقيسه العامل يدوياً بين محيط الصينية وأول طبقة)
   const d1 = Math.max(0, params.trayD - params.margin);
@@ -37,8 +34,8 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
   const radialMovement = params.spacing / 2;
   const isSpacingSafe = radialMovement >= params.tool;
 
-  const toggleSection = (key: string) => {
-    setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleSection = (key: 'geo' | 'rings' | 'pts' | 'timing') => {
+    setOpenSection((prev) => (prev === key ? null : key));
   };
 
   const setTrayUnit = (newUnit: 'cm' | 'mm') => {
@@ -202,12 +199,12 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
           </div>
           <ChevronDown
             className={`w-4 h-4 text-[#94a3b8] transition-transform duration-200 ${
-              collapsed.geo ? '-rotate-90' : 'rotate-0'
+              openSection === 'geo' ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
 
-        {!collapsed.geo && (
+        {openSection === 'geo' && (
           <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5 border-t border-[#f1f5f9]">
             {/* Tray Diameter */}
             <div>
@@ -332,12 +329,12 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
           </div>
           <ChevronDown
             className={`w-4 h-4 text-[#94a3b8] transition-transform duration-200 ${
-              collapsed.rings ? '-rotate-90' : 'rotate-0'
+              openSection === 'rings' ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
 
-        {!collapsed.rings && (
+        {openSection === 'rings' && (
           <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5 border-t border-[#f1f5f9]">
             {/* Number of concentric layers (1-7) */}
             <div>
@@ -569,12 +566,12 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
           </div>
           <ChevronDown
             className={`w-4 h-4 text-[#94a3b8] transition-transform duration-200 ${
-              collapsed.pts ? '-rotate-90' : 'rotate-0'
+              openSection === 'pts' ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
 
-        {!collapsed.pts && (
+        {openSection === 'pts' && (
           <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5 border-t border-[#f1f5f9]">
             {/* Mode switch (all vs custom) */}
             <div className="flex bg-[#f1f5f9] p-1 rounded-xl border border-[#e2e8f0]">
@@ -746,12 +743,12 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({
           </div>
           <ChevronDown
             className={`w-4 h-4 text-[#94a3b8] transition-transform duration-200 ${
-              collapsed.timing ? '-rotate-90' : 'rotate-0'
+              openSection === 'timing' ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
 
-        {!collapsed.timing && (
+        {openSection === 'timing' && (
           <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5 border-t border-[#f1f5f9]">
             {/* Deflower time (s / ms) */}
             <div>
