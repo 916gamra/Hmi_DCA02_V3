@@ -1,3 +1,10 @@
+/**
+ * TouchWinScreenMirror Component
+ * 
+ * This component provides a visual interface mirroring the TouchWin OP320 HMI screen.
+ * It is used for manual operation and parameter setting, mapping virtual screen buttons
+ * and displays to the underlying machine logic.
+ */
 import React, { useState } from 'react';
 import {
   Copy,
